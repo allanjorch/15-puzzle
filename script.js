@@ -252,20 +252,20 @@ function loadTheme() {
 function updateCubeRotation() {
     switch (currentPage) {
         case PAGES.HELP:
-            cube.style.transform = 'rotateY(-90deg)';
+            cube.style.transform = 'rotateY(90deg)';
             break;
         case PAGES.GAME:
             cube.style.transform = 'rotateY(0deg)';
             break;
         case PAGES.THEMES:
-            cube.style.transform = 'rotateY(90deg)';
+            cube.style.transform = 'rotateY(-90deg)';
             break;
     }
 }
 
 function updateNavArrows() {
-    navLeft.classList.toggle('disabled', currentPage === PAGES.HELP);
-    navRight.classList.toggle('disabled', currentPage === PAGES.THEMES);
+    navLeft.classList.toggle('disabled', currentPage === PAGES.THEMES);
+    navRight.classList.toggle('disabled', currentPage === PAGES.HELP);
 }
 
 function updatePlayPauseBtn() {
