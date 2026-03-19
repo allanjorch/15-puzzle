@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>15 Puzzle</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
     <div class="container" id="container">
@@ -13,19 +13,15 @@
                 <div class="cube-face help" id="helpFace">
                     <div class="help-content">
                         <h3>How to Play</h3>
-                        <p>Arrange the numbered tiles in order by sliding them into the empty space.</p>
+                        <p>Arrange the numbered tiles in order by sliding them into the empty space. Get tiles 1-15 in order, with the empty space in the bottom-right corner.</p>
                         
                         <h3>Controls</h3>
                         <ul>
                             <li><kbd>Arrow Keys</kbd> or <kbd>Click</kbd> - Move tiles</li>
-                            <li><kbd>N</kbd> - New game</li>
-                            <li><kbd>P</kbd> - Pause / Resume</li>
-                            <li><kbd>?</kbd> - Help</li>
-                            <li><kbd>T</kbd> - Themes</li>
+                            <li><kbd>ESC</kbd> - Reset</li>
+                            <li><kbd>ENTER</kbd> - Play</li>
+                            <li><kbd>←</kbd> <kbd>→</kbd> - Navigate cube</li>
                         </ul>
-                        
-                        <h3>Goal</h3>
-                        <p>Get tiles 1-15 in order, with the empty space in the bottom-right corner.</p>
                     </div>
                 </div>
                 <div class="cube-face game" id="gameFace">
@@ -53,6 +49,6 @@
             <span>Time: <strong id="timer">0:00</strong></span>
         </div>
     </div>
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>

@@ -314,6 +314,21 @@ function isGameWon() {
     return gameState === GAME_STATES.WON;
 }
 
+function resetToIdle() {
+    tiles = Array.from({ length: 16 }, (_, i) => (i === 15 ? 0 : i + 1));
+    emptyIndex = 15;
+    gameState = GAME_STATES.IDLE;
+    moves = 0;
+    seconds = 0;
+    stopTimer();
+    movesDisplay.textContent = '0';
+    timerDisplay.textContent = '0:00';
+    unblurTiles();
+    board.classList.remove('playing');
+    createTiles();
+    updatePlayPauseBtn();
+}
+
 function blurTiles() {
     tileElements.forEach(({ element }) => {
         if (!element.classList.contains('empty')) {
@@ -356,6 +371,7 @@ function init() {
     timerDisplay.textContent = '0:00';
     removeWinMessage();
     unblurTiles();
+    board.classList.remove('playing');
     createTiles();
     createLargeThemeSwatches();
     applyTheme(loadTheme());
@@ -384,8 +400,10 @@ function newGame() {
     movesDisplay.textContent = '0';
     timerDisplay.textContent = '0:00';
     unblurTiles();
+    board.classList.remove('playing');
     createTiles();
     updatePlayPauseBtn();
+    board.classList.add('playing');
 }
 
 function pauseGame() {
@@ -396,6 +414,7 @@ function pauseGame() {
     gameState = GAME_STATES.PAUSED;
     blurTiles();
     updatePlayPauseBtn();
+    board.classList.remove('playing');
 }
 
 function resumeGame() {
@@ -405,6 +424,7 @@ function resumeGame() {
     startTimer();
     gameState = GAME_STATES.PLAYING;
     unblurTiles();
+    board.classList.add('playing');
     updatePlayPauseBtn();
 }
 
@@ -528,7 +548,7 @@ function showWinCelebration() {
     banner.innerHTML = `
         <h2>Congratulations!</h2>
         <p>Moves: ${moves} | Time: ${timerDisplay.textContent}</p>
-        <p style="color: #666; font-size: 0.85rem; margin-top: 0.5rem;">Press Enter or Escape</p>
+        <p class="win-hint">Press Enter or Escape</p>
     `;
     board.appendChild(banner);
     
@@ -607,37 +627,30 @@ playPauseBtn.addEventListener('click', () => {
 
 document.addEventListener('keydown', (e) => {
     
-    if (e.key.toLowerCase() === 'n') {
-        e.preventDefault();
-        if (isOnGamePage()) {
-            newGame();
-        }
-        return;
-    }
-    
-    if (e.key.toLowerCase() === 't') {
-        e.preventDefault();
-        if (isOnGamePage()) {
-            goToPage(PAGES.THEMES);
-        }
-        return;
-    }
-    
-    if (e.key === '?') {
-        e.preventDefault();
-        if (isOnGamePage()) {
-            goToPage(PAGES.HELP);
-        }
-        return;
-    }
-    
-    if (e.key === 'Escape' || e.key === 'Enter') {
+    if (e.key === 'Escape') {
         e.preventDefault();
         
         if (isGameWon()) {
             removeWinMessage();
-            gameState = GAME_STATES.IDLE;
-            updatePlayPauseBtn();
+            resetToIdle();
+            return;
+        }
+        
+        if (currentPage === PAGES.HELP || currentPage === PAGES.THEMES) {
+            goToPage(PAGES.GAME);
+            return;
+        }
+        
+        resetToIdle();
+        return;
+    }
+    
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        
+        if (isGameWon()) {
+            removeWinMessage();
+            resetToIdle();
             return;
         }
         
@@ -657,19 +670,7 @@ document.addEventListener('keydown', (e) => {
         }
         return;
     }
-    
-    if (e.key.toLowerCase() === 'p') {
-        e.preventDefault();
-        if (isOnGamePage()) {
-            if (isGameActive()) {
-                pauseGame();
-            } else if (isGamePaused()) {
-                resumeGame();
-            }
-        }
-        return;
-    }
-    
+     
     if (!isOnGamePage()) {
         if (e.key === 'ArrowLeft') {
             e.preventDefault();
