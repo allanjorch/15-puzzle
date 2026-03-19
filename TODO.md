@@ -2,10 +2,19 @@
 
 ## Features to Implement
 
-### Color Themes
+### Color Themes (COMPLETE)
 - Random but coherent color palettes for tiles and UI elements
 - Preset themes (e.g., Neon, Pastel, Retro, Ocean)
 - Theme preview or live preview while hovering
+- Hidden for now, will be surfaced later
+
+### Focus Mode
+- [x] "Compact Mode" / "Focus Mode" that hides stats and controls
+- [x] Only the board is visible during gameplay
+- [x] Stats revealed on solve or when exiting focus mode
+- [x] Keyboard shortcut to toggle (e.g., `F`)
+- [x] Three ways to exit: F, ENTER, ESCAPE
+- [x] Clickable hint to exit with mouse
 
 ### Variable Board Dimensions
 - Support for different grid sizes: 3x3, 4x4, 4x6, 5x5, etc.

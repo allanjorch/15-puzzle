@@ -7,17 +7,19 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="container">
         <h1>15 Puzzle</h1>
         <div class="stats">
             <span>Moves: <strong id="moves">0</strong></span>
             <span>Time: <strong id="timer">0:00</strong></span>
         </div>
+        <div class="theme-selector" id="themeSelector"></div>
         <div class="board" id="board"></div>
         <div class="controls">
             <button id="newGame"><kbd>N</kbd> New Game</button>
         </div>
         <p class="info">Arrow keys or click to move | <kbd>N</kbd> new game</p>
+        <div class="focus-hint" id="focusHint"><kbd>F</kbd> exit</div>
     </div>
     <script src="script.js"></script>
 </body>
