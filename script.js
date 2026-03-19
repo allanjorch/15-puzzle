@@ -264,8 +264,8 @@ function updateCubeRotation() {
 }
 
 function updateNavArrows() {
-    navLeft.classList.toggle('disabled', currentPage === PAGES.HELP);
-    navRight.classList.toggle('disabled', currentPage === PAGES.THEMES);
+    navRight.classList.toggle('disabled', currentPage === PAGES.HELP);
+    navLeft.classList.toggle('disabled', currentPage === PAGES.THEMES);
 }
 
 function updatePlayPauseBtn() {
