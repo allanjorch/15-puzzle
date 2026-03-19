@@ -2,12 +2,9 @@ const board = document.getElementById('board');
 const cube = document.getElementById('cube');
 const movesDisplay = document.getElementById('moves');
 const timerDisplay = document.getElementById('timer');
-const statsEl = document.getElementById('stats');
-const infoEl = document.getElementById('info');
-const container = document.getElementById('container');
-const focusHint = document.getElementById('focusHint');
 const navLeft = document.getElementById('navLeft');
 const navRight = document.getElementById('navRight');
+const playPauseBtn = document.getElementById('playPauseBtn');
 
 const GAP = 6;
 const TILE_SIZE = 76;
@@ -26,7 +23,6 @@ let confettiAnimation = null;
 
 let gameState = GAME_STATES.IDLE;
 let currentPage = PAGES.GAME;
-let focusMode = false;
 
 const CONFETTI_COLORS = ['#4ecca3', '#e74c3c', '#f1c40f', '#3498db', '#9b59b6', '#1abc9c', '#e67e22'];
 
@@ -41,8 +37,7 @@ const themes = {
             'tile-bg-2': '#3db892',
             'tile-text': '#1a1a2e',
             'accent': '#4ecca3',
-            'tile-hover-shadow': 'rgba(78, 204, 163, 0.4)',
-            'button-shadow': 'rgba(78, 204, 163, 0.4)'
+            'tile-hover-shadow': 'rgba(78, 204, 163, 0.4)'
         }
     },
     neon: {
@@ -55,8 +50,7 @@ const themes = {
             'tile-bg-2': '#00ffff',
             'tile-text': '#000000',
             'accent': '#ff00ff',
-            'tile-hover-shadow': 'rgba(255, 0, 255, 0.5)',
-            'button-shadow': 'rgba(0, 255, 255, 0.5)'
+            'tile-hover-shadow': 'rgba(255, 0, 255, 0.5)'
         }
     },
     pastel: {
@@ -69,8 +63,7 @@ const themes = {
             'tile-bg-2': '#bae1ff',
             'tile-text': '#555555',
             'accent': '#ffb3ba',
-            'tile-hover-shadow': 'rgba(255, 179, 186, 0.5)',
-            'button-shadow': 'rgba(186, 225, 255, 0.5)'
+            'tile-hover-shadow': 'rgba(255, 179, 186, 0.5)'
         }
     },
     retro: {
@@ -83,8 +76,7 @@ const themes = {
             'tile-bg-2': '#f4a261',
             'tile-text': '#ffffff',
             'accent': '#e76f51',
-            'tile-hover-shadow': 'rgba(231, 111, 81, 0.5)',
-            'button-shadow': 'rgba(244, 162, 97, 0.5)'
+            'tile-hover-shadow': 'rgba(231, 111, 81, 0.5)'
         }
     },
     ocean: {
@@ -97,8 +89,7 @@ const themes = {
             'tile-bg-2': '#90e0ef',
             'tile-text': '#ffffff',
             'accent': '#90e0ef',
-            'tile-hover-shadow': 'rgba(144, 224, 239, 0.5)',
-            'button-shadow': 'rgba(0, 180, 216, 0.5)'
+            'tile-hover-shadow': 'rgba(144, 224, 239, 0.5)'
         }
     }
 };
@@ -173,8 +164,7 @@ function generateRandomPalette() {
             'tile-bg-2': tileBg2,
             'tile-text': tileText,
             'accent': accent,
-            'tile-hover-shadow': `${tileBg1}80`,
-            'button-shadow': `${tileBg2}80`
+            'tile-hover-shadow': `${tileBg1}80`
         }
     };
 }
@@ -274,31 +264,18 @@ function updateCubeRotation() {
 }
 
 function updateNavArrows() {
-    navLeft.classList.remove('active', 'disabled');
-    navRight.classList.remove('active', 'disabled');
-    
-    if (currentPage === PAGES.HELP) {
-        navLeft.classList.add('disabled');
-        navRight.classList.add('active');
-    } else if (currentPage === PAGES.GAME) {
-        navLeft.classList.add('active');
-        navRight.classList.add('active');
-    } else if (currentPage === PAGES.THEMES) {
-        navLeft.classList.add('active');
-        navRight.classList.add('disabled');
-    }
+    navLeft.classList.toggle('disabled', currentPage === PAGES.HELP);
+    navRight.classList.toggle('disabled', currentPage === PAGES.THEMES);
 }
 
-function updateUI() {
-    statsEl.classList.toggle('hidden', currentPage !== PAGES.GAME);
-    infoEl.classList.toggle('hidden', currentPage !== PAGES.GAME);
-    updateNavArrows();
+function updatePlayPauseBtn() {
+    playPauseBtn.classList.toggle('paused', gameState === GAME_STATES.PLAYING);
 }
 
 function goToPage(page) {
     currentPage = page;
     updateCubeRotation();
-    updateUI();
+    updateNavArrows();
 }
 
 function navigateLeft() {
@@ -383,6 +360,7 @@ function init() {
     createLargeThemeSwatches();
     applyTheme(loadTheme());
     goToPage(PAGES.GAME);
+    updatePlayPauseBtn();
 }
 
 function newGame() {
@@ -407,6 +385,7 @@ function newGame() {
     timerDisplay.textContent = '0:00';
     unblurTiles();
     createTiles();
+    updatePlayPauseBtn();
 }
 
 function pauseGame() {
@@ -416,6 +395,7 @@ function pauseGame() {
     stopTimer();
     gameState = GAME_STATES.PAUSED;
     blurTiles();
+    updatePlayPauseBtn();
 }
 
 function resumeGame() {
@@ -425,6 +405,7 @@ function resumeGame() {
     startTimer();
     gameState = GAME_STATES.PLAYING;
     unblurTiles();
+    updatePlayPauseBtn();
 }
 
 function isSolvable() {
@@ -612,21 +593,19 @@ function removeWinMessage() {
     }
 }
 
-function toggleFocusMode() {
-    focusMode = !focusMode;
-    container.classList.toggle('focus-mode', focusMode);
-}
-
 navLeft.addEventListener('click', navigateLeft);
 navRight.addEventListener('click', navigateRight);
-focusHint.addEventListener('click', toggleFocusMode);
+playPauseBtn.addEventListener('click', () => {
+    if (isGameActive()) {
+        pauseGame();
+    } else if (isGamePaused()) {
+        resumeGame();
+    } else if (isGameIdle()) {
+        newGame();
+    }
+});
 
 document.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() === 'f') {
-        e.preventDefault();
-        toggleFocusMode();
-        return;
-    }
     
     if (e.key.toLowerCase() === 'n') {
         e.preventDefault();
@@ -638,7 +617,7 @@ document.addEventListener('keydown', (e) => {
     
     if (e.key.toLowerCase() === 't') {
         e.preventDefault();
-        if (isOnGamePage() && !isGameActive()) {
+        if (isOnGamePage()) {
             goToPage(PAGES.THEMES);
         }
         return;
@@ -646,7 +625,7 @@ document.addEventListener('keydown', (e) => {
     
     if (e.key === '?') {
         e.preventDefault();
-        if (isOnGamePage() && !isGameActive()) {
+        if (isOnGamePage()) {
             goToPage(PAGES.HELP);
         }
         return;
@@ -658,6 +637,7 @@ document.addEventListener('keydown', (e) => {
         if (isGameWon()) {
             removeWinMessage();
             gameState = GAME_STATES.IDLE;
+            updatePlayPauseBtn();
             return;
         }
         
@@ -702,15 +682,15 @@ document.addEventListener('keydown', (e) => {
     }
     
     if (!isGameActive()) {
-        switch (e.key) {
-            case 'ArrowLeft':
-                e.preventDefault();
-                navigateLeft();
-                break;
-            case 'ArrowRight':
-                e.preventDefault();
-                navigateRight();
-                break;
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            navigateLeft();
+            return;
+        }
+        if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            navigateRight();
+            return;
         }
         return;
     }

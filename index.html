@@ -8,15 +8,6 @@
 </head>
 <body>
     <div class="container" id="container">
-        <h1>15 Puzzle</h1>
-        <div class="nav-arrows">
-            <div class="nav-arrow" id="navLeft">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-            </div>
-            <div class="nav-arrow" id="navRight">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </div>
-        </div>
         <div class="cube-container">
             <div class="cube" id="cube">
                 <div class="cube-face help" id="helpFace">
@@ -29,7 +20,6 @@
                             <li><kbd>Arrow Keys</kbd> or <kbd>Click</kbd> - Move tiles</li>
                             <li><kbd>N</kbd> - New game</li>
                             <li><kbd>P</kbd> - Pause / Resume</li>
-                            <li><kbd>F</kbd> - Focus mode</li>
                             <li><kbd>?</kbd> - Help</li>
                             <li><kbd>T</kbd> - Themes</li>
                         </ul>
@@ -46,11 +36,22 @@
                 </div>
             </div>
         </div>
+        <div class="bottom-nav">
+            <div class="nav-arrow" id="navLeft">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </div>
+            <div class="play-pause-icon" id="playPauseBtn">
+                <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5,3 19,12 5,21"/></svg>
+                <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+            </div>
+            <div class="nav-arrow" id="navRight">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </div>
+        </div>
         <div class="stats" id="stats">
             <span>Moves: <strong id="moves">0</strong></span>
             <span>Time: <strong id="timer">0:00</strong></span>
         </div>
-        <div class="focus-hint" id="focusHint"><kbd>F</kbd> exit</div>
     </div>
     <script src="script.js"></script>
 </body>
