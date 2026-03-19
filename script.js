@@ -278,18 +278,18 @@ function goToPage(page) {
     updateNavArrows();
 }
 
-function navigateLeft() {
+function goLeft() {
     if (currentPage === PAGES.GAME) {
-        goToPage(PAGES.HELP);
-    } else if (currentPage === PAGES.THEMES) {
+        goToPage(PAGES.THEMES);
+    } else if (currentPage === PAGES.HELP) {
         goToPage(PAGES.GAME);
     }
 }
 
-function navigateRight() {
+function goRight() {
     if (currentPage === PAGES.GAME) {
-        goToPage(PAGES.THEMES);
-    } else if (currentPage === PAGES.HELP) {
+        goToPage(PAGES.HELP);
+    } else if (currentPage === PAGES.THEMES) {
         goToPage(PAGES.GAME);
     }
 }
@@ -593,8 +593,8 @@ function removeWinMessage() {
     }
 }
 
-navLeft.addEventListener('click', navigateRight);
-navRight.addEventListener('click', navigateLeft);
+navLeft.addEventListener('click', goLeft);
+navRight.addEventListener('click', goRight);
 playPauseBtn.addEventListener('click', () => {
     if (isGameActive()) {
         pauseGame();
@@ -673,10 +673,10 @@ document.addEventListener('keydown', (e) => {
     if (!isOnGamePage()) {
         if (e.key === 'ArrowLeft') {
             e.preventDefault();
-            navigateRight();
+            goLeft();
         } else if (e.key === 'ArrowRight') {
             e.preventDefault();
-            navigateLeft();
+            goRight();
         }
         return;
     }
@@ -684,12 +684,12 @@ document.addEventListener('keydown', (e) => {
     if (!isGameActive()) {
         if (e.key === 'ArrowLeft') {
             e.preventDefault();
-            navigateRight();
+            goLeft();
             return;
         }
         if (e.key === 'ArrowRight') {
             e.preventDefault();
-            navigateLeft();
+            goRight();
             return;
         }
         return;
