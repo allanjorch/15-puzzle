@@ -115,13 +115,45 @@ h1 {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-@keyframes tilePulse {
+/* DISABLED: @keyframes tilePulse {
     0%, 100% { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
-    50% { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 12px 2px var(--tile-hover-shadow); }
+    50% { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 20px 4px var(--accent); }
 }
-
 .board.playing .tile:not(.empty) {
     animation: tilePulse 2s ease-in-out infinite;
+} */
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+}
+
+#playIndicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #e74c3c;
+    animation: blink 1s ease-in-out infinite;
+    display: none;
+    box-shadow: 0 0 8px #e74c3c;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+#playPauseBtn.playing #playIcon,
+#playPauseBtn.playing #pauseIcon {
+    display: none;
+}
+
+#playPauseBtn.playing #playIndicator {
+    display: block;
 }
 
 .tile:not(.empty):hover {
@@ -252,6 +284,7 @@ kbd {
     cursor: pointer;
     color: rgba(255, 255, 255, 0.7);
     transition: color 0.2s ease, transform 0.1s ease;
+    position: relative;
 }
 
 .play-pause-icon:hover {
@@ -327,7 +360,6 @@ kbd {
 .help-content ul {
     list-style: none;
     padding-left: 0;
-    text-align: left;
 }
 
 .help-content p {

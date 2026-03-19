@@ -272,6 +272,11 @@ function updatePlayPauseBtn() {
     playPauseBtn.classList.toggle('paused', gameState === GAME_STATES.PLAYING);
 }
 
+function updateRecordingIndicator() {
+    const isRecording = timerInterval !== null;
+    playPauseBtn.classList.toggle('playing', isRecording);
+}
+
 function goToPage(page) {
     currentPage = page;
     updateCubeRotation();
@@ -326,6 +331,7 @@ function resetToIdle() {
     unblurTiles();
     board.classList.remove('playing');
     createTiles();
+    playPauseBtn.classList.remove('playing');
     updatePlayPauseBtn();
 }
 
@@ -346,11 +352,13 @@ function unblurTiles() {
 function startTimer() {
     clearInterval(timerInterval);
     timerInterval = setInterval(updateTimer, 1000);
+    updateRecordingIndicator();
 }
 
 function stopTimer() {
     clearInterval(timerInterval);
     timerInterval = null;
+    updateRecordingIndicator();
 }
 
 function updateTimer() {

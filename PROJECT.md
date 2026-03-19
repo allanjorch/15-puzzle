@@ -11,26 +11,28 @@ The 15 Puzzle is a sliding tile puzzle that consists of a 4x4 grid with 15 numbe
 ### Current Implementation
 - **4x4 Grid**: Classic 15-tile puzzle layout
 - **Smooth Animations**: Tiles glide smoothly into place with CSS transitions
-- **3D Cube Navigation**: Help and Themes pages accessible via cube rotation with chevron buttons and arrow keys
-- **Minimal UI**: Clean, distraction-free interface — only the board and nav controls visible during play
+- **3D Cube Navigation**: Help and Themes pages accessible via chevron buttons or arrow keys
+- **Minimal UI**: Clean, distraction-free interface — only the board and minimal nav controls visible
+- **Recording Indicator**: Blinking red dot on the play/pause button when the game is active and timer is running
 - **Multiple Input Methods**:
   - Click tiles adjacent to the empty space
   - Arrow keys (Left, Right, Up, Down) to slide tiles
 - **Game Controls**:
-  - Play/Pause button (or `P`) to start/pause the game
-  - `N` to shuffle and start a new game
+  - `ENTER` — context-aware: starts game from idle, pauses when playing, resumes when paused
+  - `ESC` — always resets to idle state
+  - Play/Pause chevron button mirrors ENTER behavior
 - **Stats Tracking** (shown on win):
   - Move counter
-  - Timer (pauses when game is paused)
+  - Timer
 - **Win Detection**: Automatically detects when puzzle is solved
-- **Celebration**: Confetti animation on completion
+- **Celebration**: Confetti animation on completion with themed banner
 - **Color Themes**: 5 preset themes (Teal, Neon, Pastel, Retro, Ocean) + Random palette generator
 
 ### Game States
 1. **Idle**: Fresh start, no game active. Play button or ENTER starts new game.
-2. **Playing**: Timer running, moves being counted, tiles interactive
+2. **Playing**: Timer running, moves being counted, tiles interactive, recording indicator visible.
 3. **Paused**: Game exists but stopped. Tiles blurred. Play button or ENTER resumes.
-4. **Won**: Puzzle solved. Confetti + banner.
+4. **Won**: Puzzle solved. Confetti + themed banner.
 
 ### Cube Navigation
 The game features a 3D cube interface with three faces accessed via chevron buttons or arrow keys:
@@ -40,15 +42,12 @@ The game features a 3D cube interface with three faces accessed via chevron butt
 
 ## Controls
 
-| Key | On Game Page (Idle/Paused) | On Game Page (Playing) | On Help/Themes Page |
-|-----|---------------------------|------------------------|---------------------|
-| `←` `→` Arrow Keys | Navigate cube | Move tiles | Navigate cube |
-| `↑` `↓` Arrow Keys | Navigate cube | Move tiles | — |
-| `?` | Go to Help | — | — |
-| `T` | Go to Themes | — | — |
-| `ENTER` / `ESC` | Start / Resume game | — | Return to Game |
-| `P` | Pause / Resume | Pause / Resume | — |
-| `N` | New game | — | — |
+| Key | On Game Page (Idle) | On Game Page (Playing) | On Game Page (Paused) | On Help/Themes Page |
+|-----|--------------------|-----------------------|-----------------------|---------------------|
+| `←` `→` Arrow Keys | Navigate cube | Move tiles | Navigate cube | Navigate cube |
+| `↑` `↓` Arrow Keys | — | Move tiles | — | — |
+| `ENTER` | Start game | Pause | Resume | Return to Game |
+| `ESC` | — | Reset | Reset | Return to Game |
 
 ## Technical Details
 
