@@ -9,16 +9,47 @@
 <body>
     <div class="container" id="container">
         <h1>15 Puzzle</h1>
-        <div class="stats">
+        <div class="nav-arrows">
+            <div class="nav-arrow" id="navLeft">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </div>
+            <div class="nav-arrow" id="navRight">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </div>
+        </div>
+        <div class="cube-container">
+            <div class="cube" id="cube">
+                <div class="cube-face help" id="helpFace">
+                    <div class="help-content">
+                        <h3>How to Play</h3>
+                        <p>Arrange the numbered tiles in order by sliding them into the empty space.</p>
+                        
+                        <h3>Controls</h3>
+                        <ul>
+                            <li><kbd>Arrow Keys</kbd> or <kbd>Click</kbd> - Move tiles</li>
+                            <li><kbd>N</kbd> - New game</li>
+                            <li><kbd>P</kbd> - Pause / Resume</li>
+                            <li><kbd>F</kbd> - Focus mode</li>
+                            <li><kbd>?</kbd> - Help</li>
+                            <li><kbd>T</kbd> - Themes</li>
+                        </ul>
+                        
+                        <h3>Goal</h3>
+                        <p>Get tiles 1-15 in order, with the empty space in the bottom-right corner.</p>
+                    </div>
+                </div>
+                <div class="cube-face game" id="gameFace">
+                    <div class="board" id="board"></div>
+                </div>
+                <div class="cube-face themes" id="themesFace">
+                    <div class="themes-title">Themes</div>
+                </div>
+            </div>
+        </div>
+        <div class="stats" id="stats">
             <span>Moves: <strong id="moves">0</strong></span>
             <span>Time: <strong id="timer">0:00</strong></span>
         </div>
-        <div class="theme-selector" id="themeSelector"></div>
-        <div class="board" id="board"></div>
-        <div class="controls">
-            <button id="newGame"><kbd>N</kbd> New Game</button>
-        </div>
-        <p class="info">Arrow keys or click to move | <kbd>N</kbd> new game</p>
         <div class="focus-hint" id="focusHint"><kbd>F</kbd> exit</div>
     </div>
     <script src="script.js"></script>

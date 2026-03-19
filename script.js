@@ -1,24 +1,31 @@
 const board = document.getElementById('board');
+const cube = document.getElementById('cube');
 const movesDisplay = document.getElementById('moves');
 const timerDisplay = document.getElementById('timer');
-const newGameBtn = document.getElementById('newGame');
+const statsEl = document.getElementById('stats');
+const infoEl = document.getElementById('info');
 const container = document.getElementById('container');
 const focusHint = document.getElementById('focusHint');
+const navLeft = document.getElementById('navLeft');
+const navRight = document.getElementById('navRight');
 
-const GAP = 8;
-const TILE_SIZE = 72;
-const PADDING = 15;
+const GAP = 6;
+const TILE_SIZE = 76;
+const PADDING = 9;
+
+const GAME_STATES = { IDLE: 'idle', PLAYING: 'playing', PAUSED: 'paused', WON: 'won' };
+const PAGES = { HELP: 'help', GAME: 'game', THEMES: 'themes' };
 
 let tiles = [];
 let emptyIndex = 15;
 let moves = 0;
 let seconds = 0;
 let timerInterval = null;
-let gameStarted = false;
-let gameActive = false;
 let tileElements = [];
 let confettiAnimation = null;
-let gameWon = false;
+
+let gameState = GAME_STATES.IDLE;
+let currentPage = PAGES.GAME;
 let focusMode = false;
 
 const CONFETTI_COLORS = ['#4ecca3', '#e74c3c', '#f1c40f', '#3498db', '#9b59b6', '#1abc9c', '#e67e22'];
@@ -156,9 +163,6 @@ function generateRandomPalette() {
     const tileTextLightness = lightness > 50 ? 10 : 90;
     const tileText = hslToHex(baseHue, 20, tileTextLightness);
     
-    const hoverLight = Math.floor(lightness / 2);
-    const tileHoverShadow = `${tileBg1}${Math.round(hoverLight * 2.55).toString(16).padStart(2, '0')}`;
-    
     return {
         name: 'Random',
         colors: {
@@ -198,28 +202,39 @@ function applyTheme(themeName) {
     document.querySelectorAll('.theme-swatch').forEach(swatch => {
         swatch.classList.toggle('active', swatch.dataset.theme === themeName);
     });
+    document.querySelectorAll('.theme-swatch-large').forEach(swatch => {
+        swatch.classList.toggle('active', swatch.dataset.theme === themeName);
+    });
 }
 
-function createThemeSwatches() {
-    const selector = document.getElementById('themeSelector');
-    selector.innerHTML = '';
+function createLargeThemeSwatches() {
+    const grid = document.getElementById('themesFace');
+    let existingGrid = grid.querySelector('.theme-swatches-grid');
+    if (existingGrid) existingGrid.remove();
+    
+    const swatchGrid = document.createElement('div');
+    swatchGrid.className = 'theme-swatches-grid';
     
     Object.entries(themes).forEach(([key, theme]) => {
         const swatch = document.createElement('div');
-        swatch.className = 'theme-swatch';
+        swatch.className = 'theme-swatch-large';
         swatch.dataset.theme = key;
         swatch.dataset.name = theme.name;
         swatch.style.background = `linear-gradient(145deg, ${theme.colors['tile-bg-1']}, ${theme.colors['tile-bg-2']})`;
+        if (currentTheme === key) swatch.classList.add('active');
         swatch.addEventListener('click', () => applyTheme(key));
-        selector.appendChild(swatch);
+        swatchGrid.appendChild(swatch);
     });
     
     const randomSwatch = document.createElement('div');
-    randomSwatch.className = 'theme-swatch random-swatch';
+    randomSwatch.className = 'theme-swatch-large random-swatch';
     randomSwatch.dataset.theme = 'random';
     randomSwatch.dataset.name = 'Random';
+    if (currentTheme === 'random') randomSwatch.classList.add('active');
     randomSwatch.addEventListener('click', () => applyTheme('random'));
-    selector.appendChild(randomSwatch);
+    swatchGrid.appendChild(randomSwatch);
+    
+    grid.appendChild(swatchGrid);
 }
 
 function saveTheme(themeName) {
@@ -244,28 +259,137 @@ function loadTheme() {
     return savedTheme;
 }
 
+function updateCubeRotation() {
+    switch (currentPage) {
+        case PAGES.HELP:
+            cube.style.transform = 'rotateY(-90deg)';
+            break;
+        case PAGES.GAME:
+            cube.style.transform = 'rotateY(0deg)';
+            break;
+        case PAGES.THEMES:
+            cube.style.transform = 'rotateY(90deg)';
+            break;
+    }
+}
+
+function updateNavArrows() {
+    navLeft.classList.remove('active', 'disabled');
+    navRight.classList.remove('active', 'disabled');
+    
+    if (currentPage === PAGES.HELP) {
+        navLeft.classList.add('disabled');
+        navRight.classList.add('active');
+    } else if (currentPage === PAGES.GAME) {
+        navLeft.classList.add('active');
+        navRight.classList.add('active');
+    } else if (currentPage === PAGES.THEMES) {
+        navLeft.classList.add('active');
+        navRight.classList.add('disabled');
+    }
+}
+
+function updateUI() {
+    statsEl.classList.toggle('hidden', currentPage !== PAGES.GAME);
+    infoEl.classList.toggle('hidden', currentPage !== PAGES.GAME);
+    updateNavArrows();
+}
+
+function goToPage(page) {
+    currentPage = page;
+    updateCubeRotation();
+    updateUI();
+}
+
+function navigateLeft() {
+    if (currentPage === PAGES.HELP) {
+        goToPage(PAGES.GAME);
+    } else if (currentPage === PAGES.GAME) {
+        goToPage(PAGES.THEMES);
+    }
+}
+
+function navigateRight() {
+    if (currentPage === PAGES.THEMES) {
+        goToPage(PAGES.GAME);
+    } else if (currentPage === PAGES.GAME) {
+        goToPage(PAGES.HELP);
+    }
+}
+
+function isOnGamePage() {
+    return currentPage === PAGES.GAME;
+}
+
+function isGameActive() {
+    return gameState === GAME_STATES.PLAYING;
+}
+
+function isGamePaused() {
+    return gameState === GAME_STATES.PAUSED;
+}
+
+function isGameIdle() {
+    return gameState === GAME_STATES.IDLE;
+}
+
+function isGameWon() {
+    return gameState === GAME_STATES.WON;
+}
+
+function blurTiles() {
+    tileElements.forEach(({ element }) => {
+        if (!element.classList.contains('empty')) {
+            element.classList.add('blurred');
+        }
+    });
+}
+
+function unblurTiles() {
+    tileElements.forEach(({ element }) => {
+        element.classList.remove('blurred');
+    });
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+function stopTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+}
+
+function updateTimer() {
+    seconds++;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    timerDisplay.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
 function init() {
     tiles = Array.from({ length: 16 }, (_, i) => (i === 15 ? 0 : i + 1));
     emptyIndex = 15;
-    gameActive = false;
-    gameWon = false;
+    gameState = GAME_STATES.IDLE;
     moves = 0;
     seconds = 0;
-    gameStarted = false;
-    clearInterval(timerInterval);
-    timerInterval = null;
+    stopTimer();
     movesDisplay.textContent = '0';
     timerDisplay.textContent = '0:00';
     removeWinMessage();
+    unblurTiles();
     createTiles();
-    createThemeSwatches();
+    createLargeThemeSwatches();
     applyTheme(loadTheme());
+    goToPage(PAGES.GAME);
 }
 
 function newGame() {
+    if (!isOnGamePage()) return;
+    
     removeWinMessage();
-    gameWon = false;
-    gameActive = true;
+    gameState = GAME_STATES.PLAYING;
     
     do {
         for (let i = tiles.length - 1; i > 0; i--) {
@@ -277,12 +401,30 @@ function newGame() {
     
     moves = 0;
     seconds = 0;
-    gameStarted = false;
-    clearInterval(timerInterval);
-    timerInterval = null;
+    stopTimer();
+    startTimer();
     movesDisplay.textContent = '0';
     timerDisplay.textContent = '0:00';
+    unblurTiles();
     createTiles();
+}
+
+function pauseGame() {
+    if (!isOnGamePage()) return;
+    if (gameState !== GAME_STATES.PLAYING) return;
+    
+    stopTimer();
+    gameState = GAME_STATES.PAUSED;
+    blurTiles();
+}
+
+function resumeGame() {
+    if (!isOnGamePage()) return;
+    if (gameState !== GAME_STATES.PAUSED) return;
+    
+    startTimer();
+    gameState = GAME_STATES.PLAYING;
+    unblurTiles();
 }
 
 function isSolvable() {
@@ -351,13 +493,9 @@ function moveTileByValue(value) {
 }
 
 function moveTile(index) {
-    if (!gameActive) return;
+    if (!isOnGamePage()) return;
+    if (!isGameActive()) return;
     if (!canMove(index)) return;
-    
-    if (!gameStarted) {
-        gameStarted = true;
-        timerInterval = setInterval(updateTimer, 1000);
-    }
     
     [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
     emptyIndex = index;
@@ -367,7 +505,8 @@ function moveTile(index) {
     updateTilePositions();
     
     if (checkWin()) {
-        clearInterval(timerInterval);
+        stopTimer();
+        gameState = GAME_STATES.WON;
         showWinCelebration();
     }
 }
@@ -382,13 +521,6 @@ function canMove(index) {
     const colDiff = Math.abs(col - emptyCol);
     
     return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
-}
-
-function updateTimer() {
-    seconds++;
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    timerDisplay.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 function checkWin() {
@@ -406,7 +538,6 @@ function createConfettiCanvas() {
 }
 
 function showWinCelebration() {
-    gameWon = true;
     const existingBanner = document.getElementById('winBanner');
     if (existingBanner) existingBanner.remove();
     
@@ -416,7 +547,7 @@ function showWinCelebration() {
     banner.innerHTML = `
         <h2>Congratulations!</h2>
         <p>Moves: ${moves} | Time: ${timerDisplay.textContent}</p>
-        <p style="color: #666; font-size: 0.85rem; margin-top: 0.5rem;">Press Enter or Escape to dismiss</p>
+        <p style="color: #666; font-size: 0.85rem; margin-top: 0.5rem;">Press Enter or Escape</p>
     `;
     board.appendChild(banner);
     
@@ -481,44 +612,108 @@ function removeWinMessage() {
     }
 }
 
-newGameBtn.addEventListener('click', newGame);
-
-focusHint.addEventListener('click', () => {
-    toggleFocusMode();
-});
-
 function toggleFocusMode() {
     focusMode = !focusMode;
     container.classList.toggle('focus-mode', focusMode);
 }
 
+navLeft.addEventListener('click', navigateLeft);
+navRight.addEventListener('click', navigateRight);
+focusHint.addEventListener('click', toggleFocusMode);
+
 document.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() === 'n') {
-        e.preventDefault();
-        newGame();
-        return;
-    }
-    
     if (e.key.toLowerCase() === 'f') {
         e.preventDefault();
         toggleFocusMode();
         return;
     }
     
-    if (focusMode && (e.key === 'Enter' || e.key === 'Escape')) {
+    if (e.key.toLowerCase() === 'n') {
         e.preventDefault();
-        toggleFocusMode();
+        if (isOnGamePage()) {
+            newGame();
+        }
         return;
     }
     
-    if (gameWon && (e.key === 'Enter' || e.key === 'Escape')) {
+    if (e.key.toLowerCase() === 't') {
         e.preventDefault();
-        const banner = document.getElementById('winBanner');
-        if (banner) banner.remove();
+        if (isOnGamePage() && !isGameActive()) {
+            goToPage(PAGES.THEMES);
+        }
         return;
     }
     
-    if (!gameActive) return;
+    if (e.key === '?') {
+        e.preventDefault();
+        if (isOnGamePage() && !isGameActive()) {
+            goToPage(PAGES.HELP);
+        }
+        return;
+    }
+    
+    if (e.key === 'Escape' || e.key === 'Enter') {
+        e.preventDefault();
+        
+        if (isGameWon()) {
+            removeWinMessage();
+            gameState = GAME_STATES.IDLE;
+            return;
+        }
+        
+        if (currentPage === PAGES.HELP || currentPage === PAGES.THEMES) {
+            goToPage(PAGES.GAME);
+            return;
+        }
+        
+        if (isOnGamePage()) {
+            if (isGameActive()) {
+                pauseGame();
+            } else if (isGamePaused()) {
+                resumeGame();
+            } else if (isGameIdle()) {
+                newGame();
+            }
+        }
+        return;
+    }
+    
+    if (e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        if (isOnGamePage()) {
+            if (isGameActive()) {
+                pauseGame();
+            } else if (isGamePaused()) {
+                resumeGame();
+            }
+        }
+        return;
+    }
+    
+    if (!isOnGamePage()) {
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            navigateLeft();
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            navigateRight();
+        }
+        return;
+    }
+    
+    if (!isGameActive()) {
+        switch (e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                navigateLeft();
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                navigateRight();
+                break;
+        }
+        return;
+    }
     
     const emptyRow = Math.floor(emptyIndex / 4);
     const emptyCol = emptyIndex % 4;
