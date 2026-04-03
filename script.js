@@ -11,7 +11,8 @@ const TILE_SIZE = 76;
 const PADDING = 9;
 
 const GAME_STATES = { IDLE: 'idle', PLAYING: 'playing', PAUSED: 'paused', WON: 'won' };
-const PAGES = { HELP: 'help', GAME: 'game', THEMES: 'themes' };
+const PAGES = ['help', 'game', 'highscores', 'themes'];
+let currentPageIndex = 1;
 
 let tiles = [];
 let emptyIndex = 15;
@@ -22,7 +23,6 @@ let tileElements = [];
 let confettiAnimation = null;
 
 let gameState = GAME_STATES.IDLE;
-let currentPage = PAGES.GAME;
 
 const CONFETTI_COLORS = ['#4ecca3', '#e74c3c', '#f1c40f', '#3498db', '#9b59b6', '#1abc9c', '#e67e22'];
 
@@ -249,23 +249,78 @@ function loadTheme() {
     return savedTheme;
 }
 
-function updateCubeRotation() {
-    switch (currentPage) {
-        case PAGES.HELP:
-            cube.style.transform = 'rotateY(-90deg)';
-            break;
-        case PAGES.GAME:
-            cube.style.transform = 'rotateY(0deg)';
-            break;
-        case PAGES.THEMES:
-            cube.style.transform = 'rotateY(90deg)';
-            break;
-    }
+const HIGHSCORES_KEY = 'puzzleHighscores';
+const MAX_SCORES = 10;
+
+function getHighscores() {
+    const stored = localStorage.getItem(HIGHSCORES_KEY);
+    return stored ? JSON.parse(stored) : [];
+}
+
+function saveHighscore(time, moves) {
+    const scores = getHighscores();
+    const entry = {
+        time: time,
+        moves: moves,
+        date: new Date().toISOString()
+    };
+    scores.push(entry);
+    
+    scores.sort((a, b) => {
+        if (a.time !== b.time) return a.time - b.time;
+        if (a.moves !== b.moves) return a.moves - b.moves;
+        return new Date(a.date) - new Date(b.date);
+    });
+    
+    const trimmed = scores.slice(0, MAX_SCORES);
+    localStorage.setItem(HIGHSCORES_KEY, JSON.stringify(trimmed));
+    return trimmed;
+}
+
+function getTopByTime(limit = MAX_SCORES) {
+    const scores = getHighscores();
+    return [...scores].sort((a, b) => a.time - b.time).slice(0, limit);
+}
+
+function getTopByMoves(limit = MAX_SCORES) {
+    const scores = getHighscores();
+    return [...scores].sort((a, b) => a.moves - b.moves).slice(0, limit);
+}
+
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function formatDate(isoString) {
+    const date = new Date(isoString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function updateHighscoresDisplay() {
+    const timeList = document.getElementById('highscores-time');
+    const movesList = document.getElementById('highscores-moves');
+    
+    const topTime = getTopByTime();
+    const topMoves = getTopByMoves();
+    
+    timeList.innerHTML = topTime.length 
+        ? topTime.map(s => `<li><span class="score-time">${formatTime(s.time)}</span><span class="score-moves">${s.moves} moves</span><span class="score-date">${formatDate(s.date)}</span></li>`).join('')
+        : '<li><span class="score-date">No scores yet</span></li>';
+    
+    movesList.innerHTML = topMoves.length 
+        ? topMoves.map(s => `<li><span class="score-time">${s.moves}</span><span class="score-moves">moves</span><span class="score-date">${formatDate(s.date)}</span></li>`).join('')
+        : '<li><span class="score-date">No scores yet</span></li>';
+}
+
+function updateCubeRotation(targetIndex = currentPageIndex) {
+    cube.style.transform = 'rotateY(' + (-targetIndex * 90) + 'deg)';
 }
 
 function updateNavArrows() {
-    navRight.classList.toggle('disabled', currentPage === PAGES.HELP);
-    navLeft.classList.toggle('disabled', currentPage === PAGES.THEMES);
+    navLeft.classList.toggle('disabled', currentPageIndex === 0);
+    navRight.classList.toggle('disabled', currentPageIndex === PAGES.length - 1);
 }
 
 function updatePlayPauseBtn() {
@@ -277,30 +332,46 @@ function updateRecordingIndicator() {
     playPauseBtn.classList.toggle('playing', isRecording);
 }
 
-function goToPage(page) {
-    currentPage = page;
+function goToPage(index) {
+    currentPageIndex = index;
     updateCubeRotation();
     updateNavArrows();
 }
 
+function bounceLeft() {
+    cube.classList.remove('bounce-right');
+    cube.classList.add('bounce-left');
+    setTimeout(() => cube.classList.remove('bounce-left'), 400);
+}
+
+function bounceRight() {
+    cube.classList.remove('bounce-left');
+    cube.classList.add('bounce-right');
+    setTimeout(() => cube.classList.remove('bounce-right'), 400);
+}
+
 function goLeft() {
-    if (currentPage === PAGES.GAME) {
-        goToPage(PAGES.THEMES);
-    } else if (currentPage === PAGES.HELP) {
-        goToPage(PAGES.GAME);
+    if (currentPageIndex === 0) {
+        bounceLeft();
+        return;
     }
+    currentPageIndex--;
+    updateCubeRotation();
+    updateNavArrows();
 }
 
 function goRight() {
-    if (currentPage === PAGES.GAME) {
-        goToPage(PAGES.HELP);
-    } else if (currentPage === PAGES.THEMES) {
-        goToPage(PAGES.GAME);
+    if (currentPageIndex === PAGES.length - 1) {
+        bounceRight();
+        return;
     }
+    currentPageIndex++;
+    updateCubeRotation();
+    updateNavArrows();
 }
 
 function isOnGamePage() {
-    return currentPage === PAGES.GAME;
+    return PAGES[currentPageIndex] === 'game';
 }
 
 function isGameActive() {
@@ -383,7 +454,8 @@ function init() {
     createTiles();
     createLargeThemeSwatches();
     applyTheme(loadTheme());
-    goToPage(PAGES.GAME);
+    updateHighscoresDisplay();
+    goToPage(1);
     updatePlayPauseBtn();
 }
 
@@ -547,6 +619,9 @@ function createConfettiCanvas() {
 }
 
 function showWinCelebration() {
+    saveHighscore(seconds, moves);
+    updateHighscoresDisplay();
+    
     const existingBanner = document.getElementById('winBanner');
     if (existingBanner) existingBanner.remove();
     
@@ -644,8 +719,10 @@ document.addEventListener('keydown', (e) => {
             return;
         }
         
-        if (currentPage === PAGES.HELP || currentPage === PAGES.THEMES) {
-            goToPage(PAGES.GAME);
+        const currentPage = PAGES[currentPageIndex];
+        
+        if (currentPage === 'help' || currentPage === 'themes' || currentPage === 'highscores') {
+            goToPage(1);
             return;
         }
         
@@ -662,8 +739,10 @@ document.addEventListener('keydown', (e) => {
             return;
         }
         
-        if (currentPage === PAGES.HELP || currentPage === PAGES.THEMES) {
-            goToPage(PAGES.GAME);
+        const currentPage = PAGES[currentPageIndex];
+        
+        if (currentPage === 'help' || currentPage === 'themes' || currentPage === 'highscores') {
+            goToPage(1);
             return;
         }
         

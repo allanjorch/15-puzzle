@@ -43,19 +43,16 @@
 - Dynamic board sizing
 - Dimension selector in UI
 
-### High Score List
-- Top 10 entries per dimension
-- Two separate lists: one by moves, one by time
-- Local storage persistence
-- Display best score next to current stats
+### Navigation Debugging (COMPLETE)
+- Fixed mismatch between PAGES array order and CSS cube face positions
+- Visual layout now matches PAGES array: ['help', 'game', 'highscores', 'themes']
+- Added bounce animation when hitting boundaries (instead of wrap-around)
+- Fixed cube rotation formula for consistent 90° increments
 
-### Multi-tile Mouse Dragging
-- Drag multiple adjacent tiles at once toward the empty space
-- Smooth drag-and-drop interaction
-
-### Circular Navigation
-- Navigate from Help page directly to Themes page (and vice versa)
-- Horizontal wrap-around navigation
+### Fix Bounce Animation Rendering Issues (IN PROGRESS)
+- Boundary bounce animation occasionally shows incorrect cube face during transition
+- May be related to transition/animation conflict or backface-visibility
+- Needs investigation and fix
 
 ---
 

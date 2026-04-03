@@ -27,6 +27,7 @@ The 15 Puzzle is a sliding tile puzzle that consists of a 4x4 grid with 15 numbe
 - **Win Detection**: Automatically detects when puzzle is solved
 - **Celebration**: Confetti animation on completion with themed banner
 - **Color Themes**: 5 preset themes (Teal, Neon, Pastel, Retro, Ocean) + Random palette generator
+- **High Scores**: Local storage persistence for top 10 scores by time and by moves
 
 ### Game States
 1. **Idle**: Fresh start, no game active. Play button or ENTER starts new game.
@@ -35,10 +36,13 @@ The 15 Puzzle is a sliding tile puzzle that consists of a 4x4 grid with 15 numbe
 4. **Won**: Puzzle solved. Confetti + themed banner.
 
 ### Cube Navigation
-The game features a 3D cube interface with three faces accessed via chevron buttons or arrow keys:
+The game features a 3D cube interface with four faces accessed via chevron buttons or arrow keys:
 - **Help** (left): Instructions and controls
 - **Game** (center): The puzzle board
-- **Themes** (right): Theme selector with large preview swatches
+- **Highscores** (right): Top 10 scores by time and by moves
+- **Themes** (back): Theme selector with large preview swatches
+
+Navigation is linear (no wrap-around) with a bounce animation when hitting boundaries.
 
 ## Controls
 
@@ -62,7 +66,7 @@ The game features a 3D cube interface with three faces accessed via chevron butt
 - Absolute positioning for smooth tile animations
 - Canvas API for confetti celebration effect
 - Solvability guaranteed via inversion count algorithm
-- LocalStorage for theme persistence
+- LocalStorage for theme and high scores persistence
 
 ## Authors
 
@@ -71,4 +75,6 @@ The game features a 3D cube interface with three faces accessed via chevron butt
 
 ---
 
-*Built with care!*
+*Built with care! Co-crafted with curiosity, code, and collaboration.*
+
+*Last updated: 2026-04-03*
